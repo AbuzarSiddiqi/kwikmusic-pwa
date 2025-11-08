@@ -8086,6 +8086,39 @@
       window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
       setupMediaSessionHandlers();
 
+      // Global audio unlock for PWA - triggers on first user interaction
+      let globalAudioUnlocked = false;
+      const globalUnlockEvents = ['touchstart', 'touchend', 'click', 'keydown'];
+      
+      function globalAudioUnlock() {
+        if (globalAudioUnlocked) return;
+        
+        console.log("🎵 Global audio unlock triggered");
+        unlockAudioContext();
+        
+        // Also try to interact with YouTube player to unlock it
+        if (youtubePlayer && isPlayerReady) {
+          try {
+            youtubePlayer.setVolume(100);
+            youtubePlayer.unMute();
+          } catch (err) {
+            console.warn("YouTube player unlock error:", err);
+          }
+        }
+        
+        globalAudioUnlocked = true;
+        
+        // Remove listeners after first successful unlock
+        globalUnlockEvents.forEach(event => {
+          document.removeEventListener(event, globalAudioUnlock);
+        });
+      }
+      
+      // Attach global unlock listeners
+      globalUnlockEvents.forEach(event => {
+        document.addEventListener(event, globalAudioUnlock, { once: true, passive: true });
+      });
+
       // Background/minimize handling: remember if we were playing and try to resume when possible
       let wasPlayingOnHide = false;
       let bgResumeAttempted = false;

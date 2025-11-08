@@ -1,5 +1,5 @@
 // KwikMusic Service Worker (update-friendly)
-const CACHE_VERSION = 'v3-2025-09-04';
+const CACHE_VERSION = 'v4-2025-11-08';
 const CACHE_NAME = `kwikmusic-${CACHE_VERSION}`;
 
 // We avoid precaching HTML/JS/CSS to reduce staleness;
