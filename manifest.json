@@ -1,0 +1,26 @@
+{
+  "name": "KwikMusic",
+  "short_name": "KwikMusic",
+  "description": "A music streaming web app with search and ambient sounds",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090111",
+  "theme_color": "#090111",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+  "src": "images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+  "src": "images/kwikmusiclogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "lang": "en-US"
+}
