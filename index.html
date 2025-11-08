@@ -4486,7 +4486,7 @@
           width: "1",
           videoId: "",
           playerVars: {
-            autoplay: 0,
+            autoplay: 1, // Enable autoplay for PWA
             controls: 0,
             disablekb: 1,
             enablejsapi: 1,
@@ -4495,6 +4495,7 @@
             modestbranding: 1,
             playsinline: 1,
             rel: 0,
+            origin: window.location.origin, // Important for PWA
           },
           events: {
             onReady: onPlayerReady,
@@ -4506,17 +4507,61 @@
       function onPlayerReady(event) {
         isPlayerReady = true;
         console.log("YouTube player ready");
-        // Ensure iframe has proper permissions
+        
+        // Set volume to 100 immediately (critical for PWA audio)
+        try {
+          event.target.setVolume(100);
+          event.target.unMute();
+        } catch (err) {
+          console.warn("Failed to set initial volume:", err);
+        }
+        
+        // Ensure iframe has proper permissions for PWA standalone mode
         try {
           const iframe = event?.target?.getIframe?.();
           if (iframe) {
+            // Critical: Add all necessary permissions for PWA audio playback
             iframe.setAttribute(
               "allow",
-              "autoplay; encrypted-media; picture-in-picture; clipboard-write"
+              "autoplay *; fullscreen *; encrypted-media *; accelerometer; gyroscope; picture-in-picture; clipboard-write"
             );
             iframe.setAttribute("referrerpolicy", "origin");
+            // For PWA: ensure iframe is in the document flow properly
+            iframe.style.position = "absolute";
+            iframe.style.pointerEvents = "none";
           }
-        } catch {}
+        } catch (err) {
+          console.warn("Failed to set iframe permissions:", err);
+        }
+        
+        // PWA Audio Context unlock: Create and interact with audio context on user gesture
+        unlockAudioContext();
+      }
+      
+      // Unlock audio context for PWA (fixes iOS/Android standalone audio issues)
+      let audioContextUnlocked = false;
+      function unlockAudioContext() {
+        if (audioContextUnlocked) return;
+        
+        try {
+          // Create a silent audio context to unlock audio on mobile PWA
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            const audioCtx = new AudioContext();
+            const silentAudio = audioCtx.createBufferSource();
+            silentAudio.buffer = audioCtx.createBuffer(1, 1, 22050);
+            silentAudio.connect(audioCtx.destination);
+            silentAudio.start(0);
+            audioCtx.resume().then(() => {
+              audioContextUnlocked = true;
+              console.log("✅ Audio context unlocked for PWA");
+            }).catch(err => {
+              console.warn("Audio context unlock failed:", err);
+            });
+          }
+        } catch (err) {
+          console.warn("AudioContext unlock error:", err);
+        }
       }
 
       // Media Session API integration for background controls/metadata
@@ -4687,6 +4732,15 @@
           startYouTubeProgressTracking();
           startProgressRing();
           updateMediaSessionPlaybackState("playing");
+          
+          // PWA Fix: Ensure volume is set when playback starts
+          try {
+            event.target.unMute();
+            event.target.setVolume(100);
+          } catch (err) {
+            console.warn("Failed to ensure volume:", err);
+          }
+          
           try {
             miniPlayer.classList.add("playing");
             fullPlayer.classList.add("playing");
@@ -4861,6 +4915,7 @@
           `;
 
           resultItem.addEventListener("click", () => {
+            unlockAudioContext(); // Unlock audio on user interaction
             currentYouTubeIndex = index;
             playYouTubeMusic(result);
           });
@@ -4975,10 +5030,45 @@
         // Update UI
         updatePlayerUI(result);
         showMiniPlayer();
+        
+        // Unlock audio context on first user interaction (critical for PWA)
+        unlockAudioContext();
 
-        // Load and play video
-        youtubePlayer.loadVideoById(result.id);
-        youtubePlayer.playVideo();
+        // Load and play video with PWA-friendly approach
+        try {
+          youtubePlayer.loadVideoById(result.id);
+          
+          // For PWA: Add retry logic to ensure playback starts
+          const attemptPlay = () => {
+            try {
+              lastPauseByUser = false;
+              youtubePlayer.playVideo();
+              
+              // Verify playback started after a short delay
+              setTimeout(() => {
+                try {
+                  const state = youtubePlayer.getPlayerState();
+                  if (state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
+                    console.log("Retrying playback for PWA...");
+                    youtubePlayer.playVideo();
+                  }
+                } catch (err) {
+                  console.warn("Playback verification error:", err);
+                }
+              }, 500);
+            } catch (err) {
+              console.warn("Play attempt failed:", err);
+            }
+          };
+          
+          // Attempt play immediately and after load
+          attemptPlay();
+          setTimeout(attemptPlay, 100);
+          
+        } catch (err) {
+          console.error("playYouTubeMusic error:", err);
+        }
+        
         updateMediaSessionMetadata(result);
         updateMediaSessionPlaybackState("playing");
         refreshPrevNextHandlers();
@@ -6925,6 +7015,7 @@
             </div>
           `;
           item.addEventListener("click", () => {
+            unlockAudioContext(); // Unlock audio on user interaction
             playFromList(favs, index);
           });
           const [favBtn, addBtn] = item.querySelectorAll(
@@ -7190,6 +7281,7 @@
             </div>
           `;
           item.addEventListener("click", () => {
+            unlockAudioContext(); // Unlock audio on user interaction
             playFromList(p.tracks, index);
           });
           const removeBtn = item.querySelector(".result-actions .icon-btn");
@@ -7342,6 +7434,9 @@
       // Play/Pause buttons
       miniPlayPauseBtn.addEventListener("click", (e) => {
         e.stopPropagation();
+        
+        // Unlock audio on user interaction (critical for PWA)
+        unlockAudioContext();
 
         // Check if we're playing a recording
         if (window.currentRecordingAudio) {
@@ -7361,20 +7456,40 @@
           return;
         }
 
-        // Original YouTube logic
+        // YouTube logic with PWA retry
         if (currentYouTubeTrack && youtubePlayer) {
-          const state = youtubePlayer.getPlayerState();
-          if (state === YT.PlayerState.PLAYING) {
-            lastPauseByUser = true;
-            youtubePlayer.pauseVideo();
-          } else {
-            lastPauseByUser = false;
-            youtubePlayer.playVideo();
+          try {
+            const state = youtubePlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+              lastPauseByUser = true;
+              youtubePlayer.pauseVideo();
+            } else {
+              lastPauseByUser = false;
+              youtubePlayer.playVideo();
+              
+              // PWA fix: Retry play if it doesn't start
+              setTimeout(() => {
+                try {
+                  const newState = youtubePlayer.getPlayerState();
+                  if (newState !== YT.PlayerState.PLAYING && newState !== YT.PlayerState.BUFFERING && !lastPauseByUser) {
+                    console.log("PWA: Retrying playback on button click");
+                    youtubePlayer.playVideo();
+                  }
+                } catch (err) {
+                  console.warn("Play retry error:", err);
+                }
+              }, 300);
+            }
+          } catch (err) {
+            console.error("Play/pause error:", err);
           }
         }
       });
 
       playPauseBtn.addEventListener("click", () => {
+        // Unlock audio on user interaction (critical for PWA)
+        unlockAudioContext();
+        
         // Check if we're playing a recording
         if (window.currentRecordingAudio) {
           if (window.currentRecordingAudio.paused) {
@@ -7393,15 +7508,32 @@
           return;
         }
 
-        // Original YouTube logic
+        // YouTube logic with PWA retry
         if (currentYouTubeTrack && youtubePlayer) {
-          const state = youtubePlayer.getPlayerState();
-          if (state === YT.PlayerState.PLAYING) {
-            lastPauseByUser = true;
-            youtubePlayer.pauseVideo();
-          } else {
-            lastPauseByUser = false;
-            youtubePlayer.playVideo();
+          try {
+            const state = youtubePlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+              lastPauseByUser = true;
+              youtubePlayer.pauseVideo();
+            } else {
+              lastPauseByUser = false;
+              youtubePlayer.playVideo();
+              
+              // PWA fix: Retry play if it doesn't start
+              setTimeout(() => {
+                try {
+                  const newState = youtubePlayer.getPlayerState();
+                  if (newState !== YT.PlayerState.PLAYING && newState !== YT.PlayerState.BUFFERING && !lastPauseByUser) {
+                    console.log("PWA: Retrying playback on button click");
+                    youtubePlayer.playVideo();
+                  }
+                } catch (err) {
+                  console.warn("Play retry error:", err);
+                }
+              }, 300);
+            }
+          } catch (err) {
+            console.error("Play/pause error:", err);
           }
         }
       });
