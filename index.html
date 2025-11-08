@@ -1222,7 +1222,7 @@
         background: rgba(255, 255, 255, 0.5);
       }
 
-      /* Footer Capsule Nav */
+      /* Footer Capsule Nav - Animated Sliding Design */
       .footer-nav-wrap {
         position: fixed;
         left: 0;
@@ -1236,49 +1236,189 @@
 
       .footer-nav {
         pointer-events: auto;
+        position: relative;
         display: flex;
-        gap: 8px;
-        background: rgba(106, 13, 173, 0.16);
-        border: 1px solid rgba(246, 196, 83, 0.25);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        gap: 0;
+        /* Glassmorphism background - darker with transparency */
+        background: rgba(15, 25, 40, 0.4);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
         border-radius: 999px;
         padding: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+                    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+                    0 4px 12px rgba(106, 13, 173, 0.15);
         max-width: 560px;
         width: calc(100% - 32px);
+        overflow: hidden;
+      }
+
+      /* Animated background indicator - Glassmorphic sliding pill with subtle glow */
+      .footer-nav::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: calc(33.333% - 5.33px);
+        height: calc(100% - 16px);
+        /* Glass effect with gradient */
+        background: linear-gradient(135deg, 
+          rgba(79, 70, 229, 0.35) 0%,
+          rgba(106, 13, 173, 0.3) 50%,
+          rgba(59, 130, 246, 0.25) 100%);
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        /* Subtle settled glow (like image 1) */
+        box-shadow: 0 0 8px rgba(106, 13, 173, 0.25),
+                    0 0 15px rgba(79, 70, 229, 0.2),
+                    0 8px 20px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* Trigger glow animation when transitioning */
+      .footer-nav.transitioning::before {
+        animation: pulse-glow 0.5s ease-in-out;
+      }
+
+      /* Strong glow animation during movement */
+      @keyframes pulse-glow {
+        0% {
+          box-shadow: 0 0 8px rgba(106, 13, 173, 0.25),
+                      0 0 15px rgba(79, 70, 229, 0.2),
+                      0 8px 20px rgba(0, 0, 0, 0.3),
+                      0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+                      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 35px rgba(106, 13, 173, 0.8),
+                      0 0 60px rgba(79, 70, 229, 0.6),
+                      0 10px 30px rgba(0, 0, 0, 0.4),
+                      0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+                      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 8px rgba(106, 13, 173, 0.25),
+                      0 0 15px rgba(79, 70, 229, 0.2),
+                      0 8px 20px rgba(0, 0, 0, 0.3),
+                      0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+                      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+      }
+
+      /* Position indicator based on active button */
+      .footer-nav[data-active="0"]::before {
+        transform: translateX(0);
+      }
+
+      .footer-nav[data-active="1"]::before {
+        transform: translateX(calc(100% + 4px));
+      }
+
+      .footer-nav[data-active="2"]::before {
+        transform: translateX(calc(200% + 8px));
       }
 
       .footer-btn {
         flex: 1;
+        position: relative;
+        z-index: 1;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 10px 14px;
+        gap: 4px;
+        padding: 12px 16px;
         border: none;
         background: transparent;
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.5);
         border-radius: 999px;
         cursor: pointer;
-        transition: all 0.25s ease;
-        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        font-size: 12px;
+        font-weight: 500;
         white-space: nowrap;
+        min-width: 0;
       }
 
       .footer-btn .icon {
         display: flex;
         align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
+      .footer-btn .icon svg {
+        width: 24px;
+        height: 24px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .footer-btn span:not(.icon) {
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        opacity: 0.8;
+      }
+
+      /* Active state */
       .footer-btn.active {
-        background: linear-gradient(
-          45deg,
-          rgba(246, 196, 83, 0.25),
-          rgba(106, 13, 173, 0.25)
-        );
+        background: transparent;
         color: #fff;
-        box-shadow: inset 0 0 0 1px rgba(246, 196, 83, 0.3);
+        transform: scale(1.02);
+      }
+
+      .footer-btn.active .icon {
+        transform: scale(1.15);
+      }
+
+      .footer-btn.active .icon svg {
+        filter: drop-shadow(0 0 12px rgba(140, 200, 255, 0.8))
+                drop-shadow(0 0 6px rgba(106, 13, 173, 0.6));
+      }
+
+      .footer-btn.active span:not(.icon) {
+        opacity: 1;
+        font-weight: 600;
+        text-shadow: 0 0 15px rgba(140, 200, 255, 0.5),
+                     0 0 8px rgba(106, 13, 173, 0.4);
+      }
+
+      /* Hover effect for non-active buttons */
+      .footer-btn:not(.active):hover {
+        color: rgba(255, 255, 255, 0.8);
+        transform: translateY(-1px);
+      }
+
+      .footer-btn:not(.active):hover .icon svg {
+        transform: scale(1.05);
+      }
+
+      /* Active button press animation */
+      .footer-btn:active {
+        transform: scale(0.98);
+      }
+
+      /* Responsive: smaller screens */
+      @media (max-width: 400px) {
+        .footer-nav {
+          padding: 5px;
+        }
+
+        .footer-btn {
+          padding: 10px 12px;
+          font-size: 11px;
+          gap: 3px;
+        }
+
+        .footer-btn .icon svg {
+          width: 22px;
+          height: 22px;
+        }
       }
 
       /* Sections toggling */
@@ -3612,7 +3752,7 @@
 
       <!-- Footer Capsule Nav -->
       <div class="footer-nav-wrap">
-        <div class="footer-nav" role="tablist">
+        <div class="footer-nav" role="tablist" data-active="0">
           <button class="footer-btn active" id="tabBtnSearch">
             <span class="icon"
               ><svg class="icon"><use href="#ic-search" /></svg></span
@@ -4507,7 +4647,7 @@
       function onPlayerReady(event) {
         isPlayerReady = true;
         console.log("YouTube player ready");
-        
+
         // Set volume to 100 immediately (critical for PWA audio)
         try {
           event.target.setVolume(100);
@@ -4515,7 +4655,7 @@
         } catch (err) {
           console.warn("Failed to set initial volume:", err);
         }
-        
+
         // Ensure iframe has proper permissions for PWA standalone mode
         try {
           const iframe = event?.target?.getIframe?.();
@@ -4533,16 +4673,16 @@
         } catch (err) {
           console.warn("Failed to set iframe permissions:", err);
         }
-        
+
         // PWA Audio Context unlock: Create and interact with audio context on user gesture
         unlockAudioContext();
       }
-      
+
       // Unlock audio context for PWA (fixes iOS/Android standalone audio issues)
       let audioContextUnlocked = false;
       function unlockAudioContext() {
         if (audioContextUnlocked) return;
-        
+
         try {
           // Create a silent audio context to unlock audio on mobile PWA
           const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -4552,12 +4692,15 @@
             silentAudio.buffer = audioCtx.createBuffer(1, 1, 22050);
             silentAudio.connect(audioCtx.destination);
             silentAudio.start(0);
-            audioCtx.resume().then(() => {
-              audioContextUnlocked = true;
-              console.log("✅ Audio context unlocked for PWA");
-            }).catch(err => {
-              console.warn("Audio context unlock failed:", err);
-            });
+            audioCtx
+              .resume()
+              .then(() => {
+                audioContextUnlocked = true;
+                console.log("✅ Audio context unlocked for PWA");
+              })
+              .catch((err) => {
+                console.warn("Audio context unlock failed:", err);
+              });
           }
         } catch (err) {
           console.warn("AudioContext unlock error:", err);
@@ -4732,7 +4875,7 @@
           startYouTubeProgressTracking();
           startProgressRing();
           updateMediaSessionPlaybackState("playing");
-          
+
           // PWA Fix: Ensure volume is set when playback starts
           try {
             event.target.unMute();
@@ -4740,7 +4883,7 @@
           } catch (err) {
             console.warn("Failed to ensure volume:", err);
           }
-          
+
           try {
             miniPlayer.classList.add("playing");
             fullPlayer.classList.add("playing");
@@ -5030,25 +5173,28 @@
         // Update UI
         updatePlayerUI(result);
         showMiniPlayer();
-        
+
         // Unlock audio context on first user interaction (critical for PWA)
         unlockAudioContext();
 
         // Load and play video with PWA-friendly approach
         try {
           youtubePlayer.loadVideoById(result.id);
-          
+
           // For PWA: Add retry logic to ensure playback starts
           const attemptPlay = () => {
             try {
               lastPauseByUser = false;
               youtubePlayer.playVideo();
-              
+
               // Verify playback started after a short delay
               setTimeout(() => {
                 try {
                   const state = youtubePlayer.getPlayerState();
-                  if (state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
+                  if (
+                    state !== YT.PlayerState.PLAYING &&
+                    state !== YT.PlayerState.BUFFERING
+                  ) {
                     console.log("Retrying playback for PWA...");
                     youtubePlayer.playVideo();
                   }
@@ -5060,15 +5206,14 @@
               console.warn("Play attempt failed:", err);
             }
           };
-          
+
           // Attempt play immediately and after load
           attemptPlay();
           setTimeout(attemptPlay, 100);
-          
         } catch (err) {
           console.error("playYouTubeMusic error:", err);
         }
-        
+
         updateMediaSessionMetadata(result);
         updateMediaSessionPlaybackState("playing");
         refreshPrevNextHandlers();
@@ -6920,19 +7065,35 @@
         [tabBtnSearch, tabBtnFavorites, tabBtnPlaylists].forEach((b) =>
           b.classList.remove("active")
         );
+        
+        // Get footer-nav for animated indicator
+        const footerNav = document.querySelector('.footer-nav');
+        
+        // Add transitioning class for glow animation
+        if (footerNav) {
+          footerNav.classList.add('transitioning');
+          // Remove after animation completes
+          setTimeout(() => {
+            footerNav.classList.remove('transitioning');
+          }, 500);
+        }
+        
         if (tab === "search") {
           tabSearch.classList.add("active");
           tabBtnSearch.classList.add("active");
+          if (footerNav) footerNav.setAttribute('data-active', '0');
         }
         if (tab === "favorites") {
           tabFavorites.classList.add("active");
           tabBtnFavorites.classList.add("active");
+          if (footerNav) footerNav.setAttribute('data-active', '1');
           renderFavorites();
           lastNonSearchTab = "favorites";
         }
         if (tab === "playlists") {
           tabPlaylists.classList.add("active");
           tabBtnPlaylists.classList.add("active");
+          if (footerNav) footerNav.setAttribute('data-active', '2');
           renderPlaylists();
           lastNonSearchTab = "playlists";
         }
@@ -7434,7 +7595,7 @@
       // Play/Pause buttons
       miniPlayPauseBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        
+
         // Unlock audio on user interaction (critical for PWA)
         unlockAudioContext();
 
@@ -7466,12 +7627,16 @@
             } else {
               lastPauseByUser = false;
               youtubePlayer.playVideo();
-              
+
               // PWA fix: Retry play if it doesn't start
               setTimeout(() => {
                 try {
                   const newState = youtubePlayer.getPlayerState();
-                  if (newState !== YT.PlayerState.PLAYING && newState !== YT.PlayerState.BUFFERING && !lastPauseByUser) {
+                  if (
+                    newState !== YT.PlayerState.PLAYING &&
+                    newState !== YT.PlayerState.BUFFERING &&
+                    !lastPauseByUser
+                  ) {
                     console.log("PWA: Retrying playback on button click");
                     youtubePlayer.playVideo();
                   }
@@ -7489,7 +7654,7 @@
       playPauseBtn.addEventListener("click", () => {
         // Unlock audio on user interaction (critical for PWA)
         unlockAudioContext();
-        
+
         // Check if we're playing a recording
         if (window.currentRecordingAudio) {
           if (window.currentRecordingAudio.paused) {
@@ -7518,12 +7683,16 @@
             } else {
               lastPauseByUser = false;
               youtubePlayer.playVideo();
-              
+
               // PWA fix: Retry play if it doesn't start
               setTimeout(() => {
                 try {
                   const newState = youtubePlayer.getPlayerState();
-                  if (newState !== YT.PlayerState.PLAYING && newState !== YT.PlayerState.BUFFERING && !lastPauseByUser) {
+                  if (
+                    newState !== YT.PlayerState.PLAYING &&
+                    newState !== YT.PlayerState.BUFFERING &&
+                    !lastPauseByUser
+                  ) {
                     console.log("PWA: Retrying playback on button click");
                     youtubePlayer.playVideo();
                   }
