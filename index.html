@@ -368,7 +368,9 @@
         transition: padding-bottom 0.35s ease;
       }
       .main-content.with-mini {
-        padding-bottom: calc(170px + env(safe-area-inset-bottom)); /* extra space when mini player is shown */
+        padding-bottom: calc(
+          170px + env(safe-area-inset-bottom)
+        ); /* extra space when mini player is shown */
       }
       /* When footer nav present and no mini-player, reserve exact space to prevent overlap without causing scroll */
       .footer-nav-wrap + .spacer {
@@ -537,7 +539,9 @@
       /* Mini Player */
       .mini-player {
         position: fixed;
-        bottom: calc(70px + env(safe-area-inset-bottom)); /* float above footer capsule */
+        bottom: calc(
+          70px + env(safe-area-inset-bottom)
+        ); /* float above footer capsule */
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 32px);
@@ -1228,7 +1232,10 @@
         left: 0;
         right: 0;
         bottom: 0; /* stick to bottom of screen */
-        padding-bottom: max(8px, env(safe-area-inset-bottom)); /* respect safe area with minimum padding */
+        padding-bottom: max(
+          8px,
+          env(safe-area-inset-bottom)
+        ); /* respect safe area with minimum padding */
         display: flex;
         justify-content: center;
         z-index: 900; /* below mini player */
@@ -2255,11 +2262,11 @@
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
         }
-        
+
         .pomodoro-panel.active {
           transform: translate(-50%, -50%) scale(1);
         }
-        
+
         .pomodoro-content {
           padding: 20px;
           padding-top: 16px;
@@ -2268,70 +2275,70 @@
           overflow-y: auto;
           max-height: calc(100vh - 40px);
         }
-        
+
         .pomodoro-top {
           margin-bottom: 16px;
         }
-        
+
         .pomodoro-heading h2 {
           font-size: 24px;
         }
-        
+
         .pomodoro-kicker {
           font-size: 11px;
         }
-        
+
         .pomodoro-subtitle {
           font-size: 13px;
           margin-bottom: 16px;
         }
-        
+
         .pomodoro-progress {
           margin-bottom: 16px;
         }
-        
+
         .pomodoro-ring {
           width: 220px;
           height: 220px;
         }
-        
+
         .pomodoro-time {
           font-size: 42px;
         }
-        
+
         .pomodoro-mode {
           font-size: 13px;
         }
-        
+
         .pomodoro-phase-hint {
           font-size: 11px;
         }
-        
+
         .pomodoro-stats {
           grid-template-columns: 1fr 1fr;
           gap: 10px;
         }
-        
+
         .pomodoro-stat {
           padding: 12px;
         }
-        
+
         .pomodoro-sliders {
           gap: 12px;
           margin-bottom: 16px;
         }
-        
+
         .pomodoro-actions {
           gap: 10px;
           flex-direction: row;
         }
-        
+
         .pomodoro-action {
           flex: 1;
           padding: 14px;
           font-size: 14px;
         }
-        
+
         .pomodoro-action.ghost {
           display: none; /* Hide reset button on mobile to save space */
         }
@@ -3664,7 +3671,13 @@
       </div>
 
       <div id="pomodoroPanel" class="pomodoro-panel" aria-hidden="true">
-        <button class="pomodoro-close" id="pomodoroCloseBtn" aria-label="Close Pomodoro">×</button>
+        <button
+          class="pomodoro-close"
+          id="pomodoroCloseBtn"
+          aria-label="Close Pomodoro"
+        >
+          ×
+        </button>
         <div class="pomodoro-glow"></div>
         <div class="pomodoro-content">
           <div class="pomodoro-top">
@@ -4682,13 +4695,13 @@
 
         pomodoroBtn.setAttribute("aria-expanded", "false");
         pomodoroBtn.addEventListener("click", togglePanel);
-        
+
         // Close button for mobile
         const pomodoroCloseBtn = document.getElementById("pomodoroCloseBtn");
         if (pomodoroCloseBtn) {
           pomodoroCloseBtn.addEventListener("click", closePanel);
         }
-        
+
         if (pomodoroStartBtn) {
           pomodoroStartBtn.addEventListener("click", startPomodoro);
         }
@@ -8088,14 +8101,14 @@
 
       // Global audio unlock for PWA - triggers on first user interaction
       let globalAudioUnlocked = false;
-      const globalUnlockEvents = ['touchstart', 'touchend', 'click', 'keydown'];
-      
+      const globalUnlockEvents = ["touchstart", "touchend", "click", "keydown"];
+
       function globalAudioUnlock() {
         if (globalAudioUnlocked) return;
-        
+
         console.log("🎵 Global audio unlock triggered");
         unlockAudioContext();
-        
+
         // Also try to interact with YouTube player to unlock it
         if (youtubePlayer && isPlayerReady) {
           try {
@@ -8105,18 +8118,21 @@
             console.warn("YouTube player unlock error:", err);
           }
         }
-        
+
         globalAudioUnlocked = true;
-        
+
         // Remove listeners after first successful unlock
-        globalUnlockEvents.forEach(event => {
+        globalUnlockEvents.forEach((event) => {
           document.removeEventListener(event, globalAudioUnlock);
         });
       }
-      
+
       // Attach global unlock listeners
-      globalUnlockEvents.forEach(event => {
-        document.addEventListener(event, globalAudioUnlock, { once: true, passive: true });
+      globalUnlockEvents.forEach((event) => {
+        document.addEventListener(event, globalAudioUnlock, {
+          once: true,
+          passive: true,
+        });
       });
 
       // Background/minimize handling: remember if we were playing and try to resume when possible
@@ -8709,12 +8725,21 @@
 
             // Search YouTube for each song
             const tracks = [];
+            const seenVideoIds = new Set(); // Track video IDs to prevent duplicates
+            
             for (let i = 0; i < songs.length; i++) {
               const song = songs[i];
 
               try {
                 const track = await searchYouTubeForSong(song);
                 if (track) {
+                  // Check if we already have this video ID
+                  if (seenVideoIds.has(track.id)) {
+                    console.warn(`⚠️ Duplicate video ID detected: ${track.id} for "${song}". Skipping.`);
+                    continue;
+                  }
+                  
+                  seenVideoIds.add(track.id);
                   tracks.push(track);
                   // Add record to orbit with animation
                   addRecordToOrbit(track, tracks.length - 1, songs.length);
@@ -8783,6 +8808,8 @@ Rules:
 3. Provide EXACTLY 5 songs (no more, no less)
 4. Be specific with artist names and song titles
 5. Focus on popular, well-known versions of songs
+6. IMPORTANT: All 5 songs must be UNIQUE - no duplicates or repeated songs
+7. Each song must have a DIFFERENT title from the others
 
 Example output format:
 ["Arijit Singh - Tum Hi Ho", "Arijit Singh - Channa Mereya", "Arijit Singh - Kesariya", "Atif Aslam - Tajdar-e-Haram", "Rahat Fateh Ali Khan - Afreen Afreen"]
@@ -8863,8 +8890,30 @@ User request: ${userPrompt}`;
             throw new Error("No songs found in AI response");
           }
 
-          console.log("Parsed songs:", songs);
-          return songs;
+          // Remove duplicates by normalizing and comparing song titles
+          const uniqueSongs = [];
+          const seenTitles = new Set();
+          
+          for (const song of songs) {
+            // Normalize: lowercase, remove extra spaces, extract title part
+            const normalized = song.toLowerCase().trim();
+            const titlePart = normalized.split('-').pop().trim(); // Get song title after "-"
+            
+            if (!seenTitles.has(titlePart)) {
+              seenTitles.add(titlePart);
+              uniqueSongs.push(song);
+            } else {
+              console.warn(`⚠️ Duplicate detected and removed: ${song}`);
+            }
+          }
+
+          if (uniqueSongs.length < 5) {
+            console.warn(`⚠️ Only ${uniqueSongs.length} unique songs after removing duplicates. AI returned duplicates!`);
+            throw new Error(`AI returned duplicate songs. Got only ${uniqueSongs.length} unique songs. Please try again.`);
+          }
+
+          console.log("Parsed unique songs:", uniqueSongs);
+          return uniqueSongs.slice(0, 5); // Ensure exactly 5 songs
         }
 
         // Search YouTube for a song (simplified - no filtering)
