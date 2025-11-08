@@ -42,7 +42,77 @@
 
 ---
 
-## 🚀 Quick Start
+## � App UI Showcase
+
+<div align="center">
+
+### *Experience the Beauty*
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="images/1.png" alt="Search Interface" width="250"/>
+      <br />
+      <sub><b>🔍 Smart Search</b></sub>
+      <br />
+      <sub>Instant YouTube music discovery</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="images/2.png" alt="Now Playing" width="250"/>
+      <br />
+      <sub><b>🎵 Now Playing</b></sub>
+      <br />
+      <sub>Dynamic color-adaptive player</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="images/3.png" alt="Favorites" width="250"/>
+      <br />
+      <sub><b>❤️ Favorites</b></sub>
+      <br />
+      <sub>Your loved tracks, one tap away</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <img src="images/4.png" alt="Playlists" width="250"/>
+      <br />
+      <sub><b>📝 Playlists</b></sub>
+      <br />
+      <sub>Organize your music library</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="images/5.png" alt="AI Playlist Generator" width="250"/>
+      <br />
+      <sub><b>🤖 AI Playlists</b></sub>
+      <br />
+      <sub>Gemini-powered curation</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="images/6.png" alt="Vinyl Animation" width="250"/>
+      <br />
+      <sub><b>🎭 Vinyl Animation</b></sub>
+      <br />
+      <sub>Mesmerizing loading experience</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3">
+      <img src="images/7.png" alt="Full Player View" width="250"/>
+      <br />
+      <sub><b>🎨 Immersive Full Player</b></sub>
+      <br />
+      <sub>Gradient backgrounds from album art</sub>
+    </td>
+  </tr>
+</table>
+
+*Dark purple-pink gradients • Smooth animations • Responsive design*
+
+</div>
+
+---
+
+## �🚀 Quick Start
 
 ### 🌐 Option 1: Deploy to Netlify (Recommended)
 
